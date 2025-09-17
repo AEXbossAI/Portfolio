@@ -1,48 +1,58 @@
-Welcome!  
-My name is **Alexey Babenko** — a **Prompt Engineer and AI Developer** with a background in sales and business process management.  
-I design and implement practical AI solutions that help companies increase sales, reduce costs, and automate workflows.  
+# Septik Service Bot
 
-This repository is a **portfolio of selected projects**.  
-Full private repositories are available upon request.  
+## 📌 Описание проекта
+Проект представляет собой Telegram-бота для автоматизированного взаимодействия с пользователями.  
+Он объединяет:
+- **FastAPI-сервис** для REST API и управления рассылкой.  
+- **Telethon-клиент**, который принимает и обрабатывает входящие сообщения, а также может отправлять массовые исходящие сообщения.  
 
----
-
-## 🧑‍💻 About Me
-- 🔹 1+ year of experience in **Prompt Engineering & LLM-based solutions**  
-- 🔹 6+ years of experience in **sales, management, and business automation**  
-- 🔹 Skilled in **Python, OpenAI API, LangChain, Telethon, n8n, Make, Albato**  
-- 🔹 Hands-on with **multi-agent systems, vector databases (Pinecone, Weaviate, Chroma)**, and CRM integrations  
+Все компоненты собраны в один контейнер, что упрощает деплой и поддержку.
 
 ---
 
-## 📂 Projects
-
-### 1. Telegram LeadGen Bot
-- **Description:** Works from a personal account, automates outreach and lead generation.  
-- **Stack:** Python, Telethon, OpenAI GPT, Docker  
-- **Result:** Generated 2 sales in 3 days (previously took a month).  
-- **Demo:** [@AlexeySeptikService](https://t.me/AlexeySeptikService)  
-
----
-
-### 2. Multi-Agent CRM Assistant
-- **Description:** Automated assistant for analyzing calls from Bitrix24 CRM.  
-- **Features:** Transcription, quality scoring, manager recommendations.  
-- **Result:** Reduced analyst costs by **70%**.  
-- **Stack:** Python, OpenAI GPT, vector DB  
+## ⚙️ Архитектура
+- **Контейнер `web`**  
+  Запускается через `uvicorn main:app --host 0.0.0.0 --port 8080`.  
+  Внутри него работают:
+  - FastAPI (веб-сервер, REST API).
+  - Telethon-клиент (бот).  
+- **Volumes**  
+  Используются для сохранения данных, которые должны переживать пересборку контейнера:
+  - `sep_sessions_data` → хранение Telegram-сессий.  
+  - `sep_threads_data` → хранение внутренних данных диалогов.  
 
 ---
 
-### 3. Automation Bots
-- **Description:** Small utility bots for business tasks:  
-  - Auto-posting in VK  
-  - Resume parsing and database processing  
-  - Website Q&A assistant  
-- **Stack:** Python, n8n, Make, Albato  
+## 🤖 Функционал бота
 
----
+### 🔹 Входящие сообщения
+- Подключение к Telegram через [Telethon](https://docs.telethon.dev).  
+- Автоматическая обработка входящих сообщений:
+  - Текстовые.  
+  - Голосовые (с расшифровкой в текст).  
+- Поддержка **стоп-слов** для отключения автоответов.  
+- Поддержка команд владельца (включение/отключение автоответов в чате).  
+- Ведение контекста общения: у каждого пользователя создаётся собственный поток диалога.  
 
-## 📫 Contact
-- 📍 Location: Chelyabinsk, Russia  
-- ✉️ Email: alex174russian@yandex.ru  
-- 💬 Telegram: @Alexxeybabenko  
+### 🔹 Исходящие сообщения (аутбаунд)
+- Массовая рассылка сообщений по списку контактов (Google Sheets используется как база контактов).  
+- Автоматическая генерация первого сообщения с использованием ассистента.  
+- Добавление контактов в Telegram перед отправкой.  
+- Настраиваемые задержки между добавлением и отправкой, чтобы имитировать «живое» поведение.  
+
+### 🔹 Интеграции
+- **Google Sheets**  
+  - Хранение списка контактов.  
+  - Использование в рассылке.  
+- **Ассистент (OpenAI API)**  
+  - Генерация сообщений для пользователей.  
+  - Поддержка отдельных ассистентов для входящих и исходящих диалогов.  
+
+### 🔹 Администрирование
+- REST API для управления ботом:
+  - `/health` — проверка состояния контейнера.  
+  - `/start_outbound` — запуск массовой рассылки.  
+  - `/stop_outbound` — остановка рассылки.  
+- Логирование всех операций (подключение, обработка сообщений, ошибки).  
+ 
+
